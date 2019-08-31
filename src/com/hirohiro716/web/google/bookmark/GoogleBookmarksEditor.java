@@ -1,4 +1,4 @@
-package com.hirohiro716.web.google;
+package com.hirohiro716.web.google.bookmark;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,6 +37,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -72,6 +73,9 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
     private AnchorPane paneRoot;
     
     @FXML
+    private Label labelTitle;
+    
+    @FXML
     private RudeArrayTable rudeArrayTable;
     
     @FXML
@@ -88,10 +92,12 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
     
     @Override
     protected void beforeShowPrepare() throws Exception {
-        GoogleBookmarksEditor adder = this;
+        GoogleBookmarksEditor editor = this;
         // FXMLを読んでStageを生成
         this.setFxml(this.getClass().getResource(this.getClass().getSimpleName() + ".fxml"));
-        this.getStage().setTitle("Google Bookmarks 編集");
+        String title = "Google Bookmarks 編集";
+        this.getStage().setTitle(title);
+        this.labelTitle.setText(title);
         FormHelper.applyIcon(this.getStage());
         FormHelper.applyBugFix(this.getStage());
         // コントロールの初期化
@@ -103,12 +109,12 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
             @Override
             public void handle(ActionEvent event) {
                 RudeArray newRow = new RudeArray();
-                adder.rudeArrayTable.addRow(newRow);
-                adder.rudeArrayTable.loadMoreRows();
+                editor.rudeArrayTable.addRow(newRow);
+                editor.rudeArrayTable.loadMoreRows();
                 GenerationalRunLater.runLater(500, new Runnable() {
                     @Override
                     public void run() {
-                        adder.rudeArrayTable.getControl(newRow, "title").requestFocus();
+                        editor.rudeArrayTable.getControl(newRow, "title").requestFocus();
                     }
                 });
             }
@@ -125,7 +131,7 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
      * コントロールの初期化.
      */
     private void prepareControl() {
-        GoogleBookmarksEditor adder = this;
+        GoogleBookmarksEditor editor = this;
         RudeArrayTable table = this.rudeArrayTable;
         this.rudeArrayTable.setLoadRowsCount(100);
         this.rudeArrayTable.addColumnButton("del", "削除", new FixControlFactory<RudeArray, IMEOffButton>() {
@@ -163,7 +169,7 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
             @Override
             public AutoCompleteTextField newInstance(RudeArray item) {
                 AutoCompleteTextField textField = new AutoCompleteTextField();
-                textField.setItems(adder.labelsList);
+                textField.setItems(editor.labelsList);
                 textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
                     @Override
                     public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -183,7 +189,7 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
         GenerationalRunLater.runLater(1, new Runnable() {
             @Override
             public void run() {
-                adder.rudeArrayTable.loadMoreRows();
+                editor.rudeArrayTable.loadMoreRows();
             }
         });
     }
@@ -209,8 +215,8 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
     private EventHandler<ActionEvent> sortEvent = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            GoogleBookmarksEditor adder = GoogleBookmarksEditor.this;
-            RudeArrayTable table = adder.rudeArrayTable;
+            GoogleBookmarksEditor editor = GoogleBookmarksEditor.this;
+            RudeArrayTable table = editor.rudeArrayTable;
             LinkedHashMap<RudeArray, String> rows = new LinkedHashMap<>();
             for (RudeArray row: table.getItems()) {
                 String title = row.getString("title");
@@ -236,7 +242,7 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
                     table.loadMoreRows();
                 }
             });
-            dialog.showOnPane(adder.paneRoot);
+            dialog.showOnPane(editor.paneRoot);
         }
     };
     
@@ -246,16 +252,15 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
     private EventHandler<ActionEvent> importEvent = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            GoogleBookmarksEditor adder = GoogleBookmarksEditor.this;
+            GoogleBookmarksEditor editor = GoogleBookmarksEditor.this;
             FileChooser chooser = new FileChooser();
             chooser.setTitle("ブックマークHTMLの選択");
             chooser.getExtensionFilters().add(new ExtensionFilter("HTML", "*.html", "*.htm"));
-            File file = chooser.showOpenDialog(adder.getStage());
+            File file = chooser.showOpenDialog(editor.getStage());
             if (file == null) {
                 return;
             }
             try {
-                GoogleBookmarksBrowder.getStage().show();
                 GoogleBookmarksBrowder.loadURL(file.toURI().toURL().toString(), new Runnable() {
                     @Override   
                     public void run() {
@@ -281,16 +286,16 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
                                 row.put("title", title);
                                 row.put("url", url);
                                 row.put("label", label);
-                                adder.rudeArrayTable.addRow(row);
+                                editor.rudeArrayTable.addRow(row);
                                 break;
                             }
                         }
-                        adder.rudeArrayTable.loadMoreRows();
-                        adder.updateLabelsList();
+                        editor.rudeArrayTable.loadMoreRows();
+                        editor.updateLabelsList();
                     }
                 });
             } catch (Exception exception) {
-                InstantAlert.show(adder.paneRoot, ExceptionHelper.createDetailMessage(exception), Pos.CENTER, 3000);
+                InstantAlert.show(editor.paneRoot, ExceptionHelper.createDetailMessage(exception), Pos.CENTER, 3000);
             }
         }
     };
@@ -302,8 +307,8 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
         @Override
         public void handle(ActionEvent event) {
             GoogleBookmarksBrowder.getStage().show();
-            GoogleBookmarksEditor adder = GoogleBookmarksEditor.this;
-            RudeArrayTable table = adder.rudeArrayTable;
+            GoogleBookmarksEditor editor = GoogleBookmarksEditor.this;
+            RudeArrayTable table = editor.rudeArrayTable;
             WebEngineFlow flow = new WebEngineFlow(GoogleBookmarksBrowder.getWebView());
             for (int index = table.getItems().size() - 1; index >= 0; index--) {
                 RudeArray row = table.getItems().get(index);

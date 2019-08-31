@@ -1,4 +1,4 @@
-package com.hirohiro716.web.google;
+package com.hirohiro716.web.google.bookmark;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,10 +10,13 @@ import com.hirohiro716.StringConverter;
 import com.hirohiro716.file.FileHelper;
 import com.hirohiro716.javafx.LayoutHelper;
 import com.hirohiro716.javafx.StageBuilder;
-import com.hirohiro716.javafx.web.CookieStore;
+import com.hirohiro716.javafx.dialog.AbstractDialog.CloseEventHandler;
+import com.hirohiro716.javafx.dialog.DialogResult;
+import com.hirohiro716.javafx.dialog.confirm.Confirm;
 import com.hirohiro716.javafx.web.WebEngineController;
 import com.hirohiro716.javafx.web.WebEngineFlow;
 import com.hirohiro716.javafx.web.WebEngineFlow.Task;
+import com.hirohiro716.web.XMLCookieStore;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -68,12 +71,12 @@ public class GoogleBookmarksBrowder {
         // ブラウザを準備
         WEB_VIEW = new WebView();
         String fileSeparator = FileHelper.FILE_SEPARATOR;
-        String stringDirectory = StringConverter.join(System.getProperty("user.home"), fileSeparator, ".hirohiro716", fileSeparator, "google-bookmarks-adder", fileSeparator);
+        String stringDirectory = StringConverter.join(System.getProperty("user.home"), fileSeparator, ".hirohiro716", fileSeparator, "google-bookmarks-editor", fileSeparator);
         File directory = new File(stringDirectory);
         getWebView().getEngine().setUserDataDirectory(directory);
         try {
             CookieManager cookieManager;
-            cookieManager = new CookieManager(new CookieStore(new File(stringDirectory + "cookies.xml")), CookiePolicy.ACCEPT_ALL);
+            cookieManager = new CookieManager(new XMLCookieStore(new File(stringDirectory + "cookies.xml")), CookiePolicy.ACCEPT_ALL);
             CookieHandler.setDefault(cookieManager);
         } catch (IOException exception) {
             exception.printStackTrace();
@@ -103,19 +106,32 @@ public class GoogleBookmarksBrowder {
         STAGE = stageBuilder.getStage();
         FormHelper.applyIcon(getStage());
         FormHelper.applyBugFix(getStage());
-        WebEngineFlow flow = new WebEngineFlow(getWebView());
-        flow.addTaskLoadURL("https://www.google.com/bookmarks/?hl=ja");
-        flow.addTaskWaitForLoadElementById("sidenav");
-        flow.addTaskLoadURL("https://www.google.com/bookmarks/lookup?output=xml");
-        flow.addTaskWaitForLoadElementByTagName("bookmarks");
-        flow.addTask(new Task() {
+        Confirm confirm = new Confirm();
+        confirm.setTitle("ログイン");
+        confirm.setMessage("ブラウザでGoogleにログインします。");
+        confirm.setCloseEvent(new CloseEventHandler<DialogResult>() {
             @Override
-            public void execute(WebEngineController controller) throws Exception {
-                getStage().hide();
-                Platform.runLater(runnableAfterLogin);
+            public void handle(DialogResult resultValue) {
+                if (resultValue == DialogResult.CANCEL) {
+                    getStage().close();
+                    return;
+                }
+                WebEngineFlow flow = new WebEngineFlow(getWebView());
+                flow.addTaskLoadURL("https://www.google.com/bookmarks/?hl=ja");
+                flow.addTaskWaitForLoadElementById("sidenav");
+                flow.addTaskLoadURL("https://www.google.com/bookmarks/lookup?output=xml");
+                flow.addTaskWaitForLoadElementByTagName("bookmarks");
+                flow.addTask(new Task() {
+                    @Override
+                    public void execute(WebEngineController controller) throws Exception {
+                        getStage().hide();
+                        Platform.runLater(runnableAfterLogin);
+                    }
+                });
+                flow.execute();
             }
         });
-        flow.execute();
+        confirm.showOnPane(pane);
     }
     
     /**
@@ -125,6 +141,7 @@ public class GoogleBookmarksBrowder {
      */
     public static void loadURL(String url, Runnable runnableAfterLoad) {
         WebEngineFlow flow = new WebEngineFlow(getWebView());
+        getStage().show();
         flow.addTaskLoadURL(url);
         flow.addTask(new Task() {
             @Override

@@ -1,4 +1,4 @@
-    package com.hirohiro716.web.google;
+    package com.hirohiro716.web.google.bookmark;
 
 import com.hirohiro716.javafx.GenerationalRunLater;
 

@@ -12,7 +12,7 @@
 
 <AnchorPane fx:id="paneRoot" prefWidth="800.0" prefHeight="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <VBox fx:id="vboxRoot" spacing="15.0" AnchorPane.topAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0">
-        <Label text="Google Bookmarks 一括追加" style="-fx-font-size:150%;" />
+        <Label fx:id="labelTitle" text="タイトル" style="-fx-font-size:150%;" />
         <RudeArrayTable fx:id="rudeArrayTable" VBox.vgrow="ALWAYS" />
         <HBox spacing="15.0">
             <HBox spacing="5.0" alignment="CENTER_LEFT">
