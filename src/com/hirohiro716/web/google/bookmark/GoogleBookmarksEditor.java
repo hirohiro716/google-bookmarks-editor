@@ -186,6 +186,57 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
         for (RudeArray row : this.getDataController()) {
             this.rudeArrayTable.addRow(row);
         }
+        this.rudeArrayTable.addColumnButton("up", "上移動", new FixControlFactory<RudeArray, IMEOffButton>() {
+            @Override
+            public IMEOffButton newInstance(RudeArray item) {
+                IMEOffButton button = new IMEOffButton("上へ");
+                button.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        ArrayList<RudeArray> newItems = new ArrayList<>();
+                        for (RudeArray item: table.getItems()) {
+                            if (newItems.size() > 0 && item == table.getSelectedItem()) {
+                                newItems.add(newItems.size() - 1, item);
+                            } else {
+                                newItems.add(item);
+                            }
+                        }
+                        table.clearRows();
+                        table.addRows(newItems);
+                        table.loadMoreRows();
+                    }
+                });
+                return button;
+            }
+        });
+        this.rudeArrayTable.addColumnButton("down", "下移動", new FixControlFactory<RudeArray, IMEOffButton>() {
+            @Override
+            public IMEOffButton newInstance(RudeArray item) {
+                IMEOffButton button = new IMEOffButton("下へ");
+                button.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        ArrayList<RudeArray> newItems = new ArrayList<>();
+                        RudeArray appendRequireItem = null;
+                        for (RudeArray item: table.getItems()) {
+                            if (newItems.size() + 1 < table.getItems().size() && item == table.getSelectedItem()) {
+                                appendRequireItem = item;
+                            } else {
+                                newItems.add(item);
+                                if (appendRequireItem != null) {
+                                    newItems.add(appendRequireItem);
+                                    appendRequireItem = null;
+                                }
+                            }
+                        }
+                        table.clearRows();
+                        table.addRows(newItems);
+                        table.loadMoreRows();
+                    }
+                });
+                return button;
+            }
+        });
         GenerationalRunLater.runLater(1, new Runnable() {
             @Override
             public void run() {
@@ -243,6 +294,8 @@ public class GoogleBookmarksEditor extends AbstractEditor<ArrayList<RudeArray>> 
                 }
             });
             dialog.showOnPane(editor.paneRoot);
+            dialog.getContentPane().setMinWidth(editor.paneRoot.getWidth() * 0.6);
+            dialog.getContentPane().setMinHeight(editor.paneRoot.getHeight() * 0.95);
         }
     };
     

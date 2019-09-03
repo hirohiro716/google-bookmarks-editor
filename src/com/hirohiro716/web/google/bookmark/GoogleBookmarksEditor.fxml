@@ -10,7 +10,7 @@
 <?import com.hirohiro716.javafx.control.*?>
 <?import com.hirohiro716.javafx.control.table.*?>
 
-<AnchorPane fx:id="paneRoot" prefWidth="800.0" prefHeight="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="paneRoot" prefWidth="900.0" prefHeight="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <VBox fx:id="vboxRoot" spacing="15.0" AnchorPane.topAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0">
         <Label fx:id="labelTitle" text="タイトル" style="-fx-font-size:150%;" />
         <RudeArrayTable fx:id="rudeArrayTable" VBox.vgrow="ALWAYS" />
