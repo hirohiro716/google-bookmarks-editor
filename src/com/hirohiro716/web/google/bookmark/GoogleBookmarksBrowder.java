@@ -73,6 +73,9 @@ public class GoogleBookmarksBrowder {
         String fileSeparator = FileHelper.FILE_SEPARATOR;
         String stringDirectory = StringConverter.join(System.getProperty("user.home"), fileSeparator, ".hirohiro716", fileSeparator, "google-bookmarks-editor", fileSeparator);
         File directory = new File(stringDirectory);
+        if (directory.exists() == false) {
+            directory.mkdir();
+        }
         getWebView().getEngine().setUserDataDirectory(directory);
         try {
             CookieManager cookieManager;
